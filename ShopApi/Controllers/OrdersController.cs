@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShopApi.Models;
-using ShopApi.Models.Enums;
 using ShopApi.Models.Orders;
 using ShopApi.PublicModels.Orders;
 using ShopApi.Services.Interfaces;
@@ -48,18 +47,18 @@ public class OrdersController : ControllerBase
         return Ok(orderDtos);
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<OrderDto>> GetOrderAsync(int id)
+    [HttpGet("{orderNumber}")]
+    public async Task<ActionResult<OrderDto>> GetOrderAsync(string orderNumber)
     {
-        _logger.LogInformation($"Retrieving order with ID {id}...");
+        _logger.LogInformation($"Retrieving order with number {orderNumber}...");
 
         Order? order = await _context.Orders
             .Include(o => o.Items)
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.OrderNumber == orderNumber);
 
         if (order == null)
         {
-            _logger.LogWarning($"Order with ID {id} not found.");
+            _logger.LogWarning($"Order with order number {orderNumber} not found.");
 
             return NotFound();
         }
@@ -80,7 +79,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult> CreateOrderAsync(OrderDto orderDto)
+    public async Task<ActionResult> CreateOrderAsync(BaseOrderDto orderDto)
     {
         if (orderDto.Items == null || orderDto.Items.Count == 0)
         {
@@ -94,7 +93,14 @@ public class OrdersController : ControllerBase
             return BadRequest("Each item must have a positive quantity.");
         }
 
-        orderDto.Status = OrderStatus.New;
+        Order? existingOrder = await _context.Orders
+            .FirstOrDefaultAsync(x => x.OrderNumber == orderDto.OrderNumber);
+
+        if (existingOrder != null)
+        {
+            _logger.LogWarning("Attempt to create an order with an existing number.");
+            return BadRequest("An order with this number already exists.");
+        }
 
         Order order = _mapper.Map<Order>(orderDto);
 
