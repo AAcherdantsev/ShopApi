@@ -1,11 +1,25 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿using Microsoft.EntityFrameworkCore;
+using ShopApi.Configurations;
+using ShopApi.Mapping;
+using ShopApi.Models;
+using ShopApi.Services;
+using ShopApi.Services.Interfaces;
 
-// Add services to the container.
+var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+builder.Services.AddSingleton(builder.Configuration.GetSection("RabbitMQConfig").Get<RabbitMqConfiguration>());
+
+builder.Services.AddDbContext<OrderContext>(opt => opt.UseInMemoryDatabase("OrdersDb"));
+
+builder.Services.AddSingleton<IMessageQueueService, MessageQueueService>();
+builder.Services.AddHostedService<PaymentProcessingService>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddLogging();
 
 var app = builder.Build();
 
@@ -17,10 +31,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
-
