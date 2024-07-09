@@ -14,13 +14,13 @@ namespace ShopApi.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly IMapper _mapper;
-    private readonly OrderContext _context;
+    private readonly ShopContext _context;
     private readonly ILogger<OrdersController> _logger;
     private readonly IMessageQueueService _messageQueueService;
 
     public OrdersController(
         IMapper mapper,
-        OrderContext context,
+        ShopContext context,
         IMessageQueueService messageQueueService,
         ILogger<OrdersController> logger)
     {

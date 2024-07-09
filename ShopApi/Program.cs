@@ -12,7 +12,7 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddSingleton(builder.Configuration.GetSection("RabbitMQConfig").Get<RabbitMqConfiguration>());
 
-builder.Services.AddDbContext<OrderContext>(opt => opt.UseInMemoryDatabase("OrdersDb"));
+builder.Services.AddDbContext<ShopContext>(opt => opt.UseInMemoryDatabase("OrdersDb"));
 
 builder.Services.AddSingleton<IMessageQueueService, MessageQueueService>();
 builder.Services.AddHostedService<PaymentProcessingService>();

@@ -87,7 +87,7 @@ public class PaymentProcessingService : BackgroundService
 
             PaymentInfoDto? message = JsonConvert.DeserializeObject<PaymentInfoDto>(Encoding.UTF8.GetString(body));
 
-            OrderContext context = scope.ServiceProvider.GetRequiredService<OrderContext>();
+            ShopContext context = scope.ServiceProvider.GetRequiredService<ShopContext>();
 
             Order? order = await context.Orders.FirstOrDefaultAsync(x => x.OrderNumber == message.OrderNumber);
 
